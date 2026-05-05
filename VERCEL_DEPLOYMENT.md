@@ -29,11 +29,25 @@ This is the easiest approach for Vercel hosting.
    - Output Directory: .next
 
 3. **Configure Environment Variables**
-   In Vercel Dashboard > Project Settings > Environment Variables:
+   Fastest path: run the CLI helper in the repo root after `vercel login` and `vercel link`:
+   ```bash
+   bash setup-vercel.sh
    ```
-   NEXT_PUBLIC_API_URL=https://your-project.vercel.app/api
-   DATABASE_URL=sqlite:///data/incentive_system.db
+
+   If you only want to import the production environment variables with Vercel CLI, use:
+   ```bash
+   bash vercel-env-production.sh
    ```
+
+   For preview or development environment sets, use:
+   ```bash
+   bash vercel-env-preview.sh
+   bash vercel-env-development.sh
+   ```
+
+   This applies the full production set to Vercel, including API, database, auth, logging, caching, rate limiting, and feature flags.
+
+   If you prefer the dashboard, set the same variables under Project Settings > Environment Variables.
 
 4. **Deploy**
    - Click "Deploy"
@@ -181,6 +195,16 @@ Connect to external PostgreSQL or MongoDB
 ## 🚀 Deployment Commands
 
 ```bash
+# Apply production environment variables and build locally
+bash setup-vercel.sh
+
+# Import only the production environment variables
+bash vercel-env-production.sh
+
+# Import preview or development environment variables
+bash vercel-env-preview.sh
+bash vercel-env-development.sh
+
 # Deploy to Vercel (production)
 vercel deploy --prod
 

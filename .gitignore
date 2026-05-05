@@ -77,3 +77,6 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+.vercel
+.env*.local
+node_modules
