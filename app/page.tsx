@@ -4,6 +4,8 @@ import IncentiveHistogram from '../components/Charts/IncentiveHistogram'
 import TopPerformersTable from '../components/Tables/TopPerformers'
 import prisma from '../lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 function bucketPayout(payout: number) {
   if (payout < 1000) return '< $1k'
   if (payout < 5000) return '$1k-$5k'

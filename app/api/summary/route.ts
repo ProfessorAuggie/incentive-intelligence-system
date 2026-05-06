@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import prisma from '../../../lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   const totalPayout = await prisma.incentive.aggregate({ _sum: { payout: true } })
   const totalEmployees = await prisma.employee.count()

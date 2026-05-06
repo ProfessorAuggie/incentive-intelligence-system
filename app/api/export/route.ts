@@ -1,5 +1,7 @@
 import prisma from '../../../lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 function csvEscape(value: string | number | null | undefined) {
   const text = value == null ? '' : String(value)
   return `"${text.replaceAll('"', '""')}"`

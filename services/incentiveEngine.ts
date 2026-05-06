@@ -1,8 +1,8 @@
 import prisma from '../lib/prisma'
-import { validatePerformance } from './validation'
+import { validateCalculationInput } from './validation'
 
 export async function calculateIncentiveForPerformance(perf: any, employee: any) {
-  validatePerformance(perf)
+  validateCalculationInput(perf, employee)
 
   let rate = 0
   const sales = perf.sales
@@ -16,7 +16,18 @@ export async function calculateIncentiveForPerformance(perf: any, employee: any)
   if (employee.isManager) rate += 0.03
 
   const payout = Number((sales * rate).toFixed(2))
-  const breakdown = { baseRate: rate, sales, target, growth }
+  const breakdown = {
+    baseRate: rate,
+    sales,
+    target,
+    growth,
+    rules: {
+      targetReached: sales >= target,
+      superTargetReached: sales >= target * 1.5,
+      growthBonusApplied: growth > 20,
+      managerOverrideApplied: Boolean(employee?.isManager)
+    }
+  }
 
   return { payout, breakdown }
 }
@@ -24,8 +35,11 @@ export async function calculateIncentiveForPerformance(perf: any, employee: any)
 export async function calculateAllIncentives() {
   const performances = await prisma.performance.findMany({ include: { employee: true } })
   const created: any[] = []
+  let processedCount = 0
+  let failedCount = 0
 
   for (const p of performances) {
+    processedCount += 1
     try {
       const { payout, breakdown } = await calculateIncentiveForPerformance(p, p.employee)
       const rec = await prisma.incentive.upsert({
@@ -40,9 +54,17 @@ export async function calculateAllIncentives() {
       })
       created.push(rec)
     } catch (err) {
+      failedCount += 1
       console.error('calc error', err)
     }
   }
 
-  return created
+  console.info(`[incentiveEngine] processed=${processedCount} upserted=${created.length} failed=${failedCount}`)
+
+  return {
+    processedCount,
+    upsertedCount: created.length,
+    failedCount,
+    incentives: created
+  }
 }
