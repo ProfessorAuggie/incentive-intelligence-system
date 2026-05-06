@@ -8,6 +8,8 @@ export async function generateDummyData() {
   let employeesInserted = 0
   let performancesInserted = 0
 
+  console.info('[data-flow-producer] Starting dummy data generation...')
+
   for (let i = 1; i <= 30; i += 1) {
     const isManager = i % 10 === 0
     const employeePayload = {
@@ -39,15 +41,37 @@ export async function generateDummyData() {
     }
   }
 
+  console.info('[data-flow-producer] Generated and persisted', {
+    employees: employeesInserted,
+    performances: performancesInserted
+  })
+
   return { employeesInserted, performancesInserted }
 }
 
 export async function resetSharedData() {
+  console.info('[data-flow-producer] Starting database reset and reseed...')
+
   const incentiveDeleted = await prisma.incentive.deleteMany()
   const performanceDeleted = await prisma.performance.deleteMany()
   const employeeDeleted = await prisma.employee.deleteMany()
 
+  console.info('[data-flow-producer] Deleted previous data', {
+    incentives: incentiveDeleted.count,
+    performances: performanceDeleted.count,
+    employees: employeeDeleted.count
+  })
+
   const seeded = await generateDummyData()
+
+  console.info('[data-flow-producer] Reset complete', {
+    deleted: {
+      incentives: incentiveDeleted.count,
+      performances: performanceDeleted.count,
+      employees: employeeDeleted.count
+    },
+    seeded
+  })
 
   return {
     deleted: {
@@ -60,11 +84,19 @@ export async function resetSharedData() {
 }
 
 export async function getHealthSnapshot() {
+  console.info('[data-flow-producer] Health check requested')
+
   const [employees, performances, incentives] = await Promise.all([
     prisma.employee.count(),
     prisma.performance.count(),
     prisma.incentive.count()
   ])
+
+  console.info('[data-flow-producer] Health snapshot retrieved', {
+    employees,
+    performances,
+    incentives
+  })
 
   return {
     ok: true,

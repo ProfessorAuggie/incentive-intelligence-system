@@ -12,6 +12,8 @@ export function detectAnomaliesFor(incentive: any, performance: any) {
 }
 
 export async function scanAllAnomalies() {
+  console.info('[data-flow-producer] Starting anomaly detection scan')
+
   const incentives = await prisma.incentive.findMany({ include: { performance: true } })
   const results: any[] = []
   let processedCount = 0
@@ -26,6 +28,11 @@ export async function scanAllAnomalies() {
       await prisma.incentive.update({ where: { id: inc.id }, data: { anomalies: a } })
     }
   }
+
+  console.info('[data-flow-producer] Anomalies detected and flagged', {
+    processed: processedCount,
+    flagged: flaggedCount
+  })
 
   console.info(`[anomalyDetection] processed=${processedCount} flagged=${flaggedCount}`)
 

@@ -33,6 +33,8 @@ export async function calculateIncentiveForPerformance(perf: any, employee: any)
 }
 
 export async function calculateAllIncentives() {
+  console.info('[data-flow-producer] Starting incentive calculation for all performances')
+
   const performances = await prisma.performance.findMany({ include: { employee: true } })
   const created: any[] = []
   let processedCount = 0
@@ -55,11 +57,17 @@ export async function calculateAllIncentives() {
       created.push(rec)
     } catch (err) {
       failedCount += 1
-      console.error('calc error', err)
+      console.error('[incentiveEngine] Calculation error:', err)
     }
   }
 
-  console.info(`[incentiveEngine] processed=${processedCount} upserted=${created.length} failed=${failedCount}`)
+  console.info('[data-flow-producer] Incentives calculated and persisted', {
+    processed: processedCount,
+    upserted: created.length,
+    failed: failedCount
+  })
+
+  console.info('[incentiveEngine] processed=${processedCount} upserted=${created.length} failed=${failedCount}')
 
   return {
     processedCount,
